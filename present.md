@@ -1,35 +1,57 @@
 ---
 title: "CI/CD: Managing Change"
 author: ""
----
+<!-- end_slide -->
 
 # CI/CD: Managing Change
 
----
+<!-- end_slide -->
 
 # Who am I?
 
-<!-- Add your introduction here -->
+I'm Jacob! Some people call me dino.
 
----
+Some things I do:
+
+<!-- list_item_newlines: 4 -->
+
+- Senior Software Engineer at CarbinX Technologies
+- CTO at Annona
+- Part of a systems research group at UofA
+
+<!-- end_slide -->
+
+# Where can you find me?
+
+<!-- list_item_newlines: 4 -->
+
+- On github as jdeinum
+- On discord as deinum#4841
+- On nullspaces.io, little project of mine
+
+<!-- end_slide -->
 
 # What is CI/CD?
 
-## Technical Definition
+--- 
+
+## I've seen it defined as:
+
 
 **Continuous Integration (CI):** The practice of frequently integrating code changes into a shared repository, verified by automated builds and tests.
 
 **Continuous Delivery/Deployment (CD):** The practice of automatically preparing and potentially releasing code changes to production.
 
----
+<!-- end_slide -->
 
 # What is CI/CD?
 
-## Simple Definition
+## My preferred definition:
 
-A system that helps us **safely and consistently** get code from our laptops to production.
+An anti entropy system that takes code from your laptop and deploys it in
+production.
 
----
+<!-- end_slide -->
 
 # Why Do We Need It?
 
@@ -43,17 +65,9 @@ Deploying code that **changes** is hard:
 - Meeting SLAs / SLOs
 - ...and more
 
----
+<!-- end_slide -->
 
-# CI/CD as Anti-Entropy
-
-CI/CD helps us **manage change** in a consistent way.
-
-Think of it as a form of **anti-entropy**  fighting the natural tendency of systems to become disordered over time.
-
----
-
-# Taking a Simple Rust App to Production
+# Taking a Simple App to Production
 
 ## Goals
 
@@ -62,9 +76,9 @@ Think of it as a form of **anti-entropy**  fighting the natural tendency of sys
 - Ensure proper code quality
 - Ensure developer agility
 
----
+<!-- end_slide -->
 
-# Taking a Simple Rust App to Production
+# Taking a Simple App to Production
 
 ## Non-Goals
 
@@ -72,16 +86,16 @@ Think of it as a form of **anti-entropy**  fighting the natural tendency of sys
 
 We'll focus on the **pipeline**, not the platform.
 
----
+<!-- end_slide -->
 
 # Environment Setup
 
-- Simple HTTP application (Rust)
+- Simple API in Rust
 - 3 branches: `dev`, `master`, `image_updates`
 - **k3d** for local Kubernetes
 - **ArgoCD** for GitOps deployments
 
----
+<!-- end_slide -->
 
 # Initiating the Pipeline
 
@@ -90,9 +104,23 @@ How do we trigger a release?
 - Git tag
 - Push to master
 - Release PR
-- ???
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate]:::current --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Tests
 
@@ -100,17 +128,32 @@ How do we trigger a release?
 
 Tests should be **independent** and **reproducible**.
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]:::current
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Tests
 
 ## Types of Tests
 
 Consider both:
-- **Scope:** Unit ’ Integration ’ E2E
+- **Scope:** Unit â†’ Integration â†’ E2E
 - **Purity:** Pure (deterministic) vs Impure (side effects)
 
----
+<!-- end_slide -->
 
 # Tests
 
@@ -120,7 +163,7 @@ Consider both:
 - Mutation testing?
 - Property-based testing?
 
----
+<!-- end_slide -->
 
 # Benchmarks
 
@@ -131,7 +174,22 @@ Consider both:
 - Statistical significance
 - Reproducibility
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]:::current
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Code Quality Checks
 
@@ -140,7 +198,22 @@ Consider both:
 
 Consistency across the codebase.
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]:::current
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Documentation
 
@@ -149,7 +222,22 @@ Consistency across the codebase.
 - Require docs for all public functions
 - `#![deny(missing_docs)]`
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]:::current
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Documentation
 
@@ -170,7 +258,7 @@ fn add(a: i32, b: i32) -> i32 {
 
 Your examples are your tests!
 
----
+<!-- end_slide -->
 
 # Correctness Checks
 
@@ -181,7 +269,22 @@ Proving correctness through:
 - Formal verification (where applicable)
 - Contract testing
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]:::current
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Audits
 
@@ -190,7 +293,22 @@ Proving correctness through:
 - `cargo audit` for known vulnerabilities
 - Dependency scanning in CI
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]:::current
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Audits
 
@@ -199,7 +317,7 @@ Proving correctness through:
 - Finding abandoned crates
 - Planning migration paths
 
----
+<!-- end_slide -->
 
 # Building
 
@@ -210,7 +328,22 @@ Proving correctness through:
 - How do we attach context? (SBOMs, provenance data)
 - Image scanning?
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]:::current
+    H --> I[Push]
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Pushing
 
@@ -221,7 +354,22 @@ Proving correctness through:
 
 Immutable artifacts = reproducible deployments.
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]:::current
+    I --> J[Deploy]
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Deploying: Noticing New Versions
 
@@ -229,7 +377,22 @@ ArgoCD watches for new versions of your software.
 
 GitOps: **Git is the source of truth.**
 
----
+```mermaid +render +width:70%
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Documentation]
+    E --> F[Correctness]
+    F --> G[Audits]
+    G --> H[Build]
+    H --> I[Push]
+    I --> J[Deploy]:::current
+
+    classDef current fill:#f96,stroke:#333,stroke-width:4px
+```
+
+<!-- end_slide -->
 
 # Deploying: Applying Changes
 
@@ -237,7 +400,7 @@ GitOps: **Git is the source of truth.**
 - **Production:** Manual verification before updating manifests
 - ArgoCD sees updated manifest and applies changes
 
----
+<!-- end_slide -->
 
 # Precursor: Conventional Commits
 
@@ -250,11 +413,11 @@ In ArgoCD, **you** define what a "new version" is!
 - Create release PRs
 - Prevent accidental breaking changes
 
----
+<!-- end_slide -->
 
 # Thanks!
 
----
+<!-- end_slide -->
 
 # Questions?
 

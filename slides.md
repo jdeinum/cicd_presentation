@@ -10,6 +10,22 @@ transition: none
 mdc: true
 ---
 
+<style>
+.slidev-layout pre code,
+.slidev-layout .shiki,
+.shiki code,
+pre.shiki-magic-move,
+div[class*="language-"] pre,
+div[class*="language-"] code {
+  line-height: 1.1 !important;
+  padding: 0.5rem !important;
+}
+
+.shiki .line {
+  line-height: 1.1 !important;
+}
+</style>
+
 # CI/CD: Managing Change
 
 ---
@@ -499,11 +515,11 @@ use std::time::SystemTime;
 
 let start = SystemTime::now();
 
-isEven(2);
+FunctionThatNormallyTakes100SecondsToRun();
 
 let time_in_seconds = start.elapsed();
 
-println!("isEven took {} seconds", elapsed.as_secs());
+println!("Function took {} seconds", elapsed.as_secs());
 ```
 
 Seems pretty reasonable...
@@ -525,6 +541,73 @@ flowchart LR
 
 # Benchmarks
 
+<div class="grid grid-cols-2 gap-4">
+  <v-click>
+    <img src="/res.jpeg" />
+  </v-click>
+  <v-click>
+    <div>
+      <img src="/pre_instant.jpg" class="w-3/4 mt-8 ml-20" />
+      <div class="absolute bottom-10 left-10 text-2xl font-bold">
+        You've done it!
+      </div>
+    </div>
+  </v-click>
+</div>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]:::current
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Benchmarks
+
+```rust {all|1}
+use std::time::SystemTime;
+
+let start = SystemTime::now();
+
+FunctionThatNormallyTakes100SecondsToRun();
+
+let time_in_seconds = start.elapsed();
+
+println!("Function took {} seconds", elapsed.as_secs());
+```
+
+<v-click>
+
+Not **monotonic**, NTP can step your clock back!
+
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]:::current
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Benchmarks
+
+````md magic-move
 ```rust
 use std::time::SystemTime;
 
@@ -537,13 +620,74 @@ let time_in_seconds = start.elapsed();
 println!("Function took {} seconds", elapsed.as_secs());
 ```
 
-Seems pretty reasonable...
+```rust
+use std::time::Instant; // instant is monotonic, phew!
+
+let start = Instant::now();
+
+FunctionThatNormallyTakes100SecondsToRun();
+
+let time_in_seconds = start.elapsed();
+
+println!("Function took {} seconds", elapsed.as_secs());
+```
+````
 
 ---
 
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]:::current
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
 # Benchmarks
 
-OUTPUT PICTURE HERE
+```rust
+use std::time::Instant;
+
+let start = Instant::now();
+
+FunctionThatNormallyTakes100SecondsToRun();
+
+let time_in_seconds = start.elapsed();
+
+println!("Function took {} seconds", elapsed.as_secs());
+```
+
+Now we get consistent benchmark times right?
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]:::current
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# How do we know:
+
+<v-click>
+
+- We get the same CPU share time
+- The system didn't pause to reap memory
+- Other programs flood the TLB ?
+
+</v-click>
 
 ---
 

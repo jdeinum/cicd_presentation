@@ -47,19 +47,29 @@ p, li, span, div {
 }
 
 /* Code blocks */
-code, pre {
+pre {
   font-family: 'JetBrains Mono', monospace !important;
   background: #1e293b !important;
   border: 1px solid #334155 !important;
   border-radius: 8px !important;
   color: #e2e8f0 !important;
-}
-
-pre {
   padding: 1rem !important;
 }
 
-code {
+pre code {
+  font-family: 'JetBrains Mono', monospace !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+
+/* Inline code */
+:not(pre) > code {
+  font-family: 'JetBrains Mono', monospace !important;
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 4px !important;
   padding: 0.2rem 0.4rem !important;
   color: #f472b6 !important;
 }
@@ -74,13 +84,23 @@ li::marker {
 }
 
 /* Links */
-a {
+a,
+a:link,
+a:visited,
+a:hover,
+a:active,
+.slidev-layout a,
+.slidev-page a {
   color: #60a5fa !important;
-  text-decoration: none;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  border-bottom: none !important;
   transition: color 0.2s ease;
 }
 
-a:hover {
+a:hover,
+.slidev-layout a:hover,
+.slidev-page a:hover {
   color: #93c5fd !important;
 }
 
@@ -100,4 +120,20 @@ strong, b {
 /* Mermaid diagrams */
 .mermaid {
   background: transparent !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* Citations */
+.citation,
+.citation a,
+.citation a:link,
+.citation a:visited,
+.citation a:hover {
+  font-size: 5px !important;
+  color: #60a5fa !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  border-bottom: none !important;
+  vertical-align: super;
 }

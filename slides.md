@@ -173,25 +173,37 @@ This lets us fork from main without fear!
 
 ## Semantic Versioning
 
-Something often skipped that has **massive downstream impact**.
+<br>
 
-**1 in 6** of the top 1000 crates has violated semver at least once!
+<v-click>
 
-Conventional commits help:
+**1 in 6** of the top 1000 crates has violated semver at least once! <span class="citation"><a href="/sources">[1]</a></span>
+
+</v-click>
+
+<br>
+
+<v-click>
+
+[Conventional commits](https://www.conventionalcommits.org/) help:
 
 - Automate version bumping
 - Generate changelogs
 - Prevent accidental breaking changes
 
+</v-click>
+
 ---
 
 # Pushing Changes to Main
 
-## Tools of Interest
+Tools of Interest:
 
-- **git** / **jj** - Version control
-- **release-plz** - Automated release PRs
-- **cargo-semver-checks** - Lint for semver violations
+<v-click>
+
+- git / [jj](https://github.com/martinvonz/jj) - Version control
+
+</v-click>
 
 ---
 
@@ -205,16 +217,46 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Initiating the Pipeline
 
 How do we trigger a release?
 
-- Git tag
-- Push to master
+<v-click>
+
+- Manual git tag
 - Release PR
+- Push to master
+
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate]:::current --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Initiating the Pipeline
+
+Tools of Interest:
+
+<v-click>
+
+- [release-plz](https://github.com/release-plz/release-plz) - Automated releases
+- [cargo-semver-checks](https://github.com/obi1kenobi/cargo-semver-checks) - Semver linting
+
+</v-click>
 
 ---
 
@@ -228,31 +270,14 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Tests
 
-Tests are one of the cornerstones of building reliable software.
-
 Each testing strategy lies somewhere on a **scope** and **purity** grid.
 
----
-
-```mermaid
-flowchart LR
-    A[Initiate] --> B[Tests]:::current
-    B --> C[Benchmarks]
-    C --> D[Code Quality]
-    D --> E[Correctness]
-    E --> F[Audits]
-    F --> G[Build]
-    G --> H[Push]
-    H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
-```
-
-# Tests - Types
+<v-click>
 
 - Unit tests
 - Invariant testing
@@ -261,6 +286,8 @@ flowchart LR
 - Contract based testing
 - Integration tests
 
+</v-click>
+
 ---
 
 ```mermaid
@@ -273,23 +300,91 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Tests - The Trap
+# Tests
+
+Why testing might be worthwhile.
+
+**NIST (2002):** <span class="citation"><a href="/sources">[2]</a></span>
+
+<v-click>
+
+- Software bugs cost the U.S. economy **$59.5 billion/year**
+- Over **1/3** of this cost (~$22B) could be avoided with better testing
+- ~80% of development costs go to identifying and correcting defects
+
+</v-click>
+
+**CISQ (2020):** <span class="citation"><a href="/sources">[3]</a></span>
+
+<v-click>
+
+- Updated estimate: **$2.08 trillion** in costs from poor software quality (US only)
+
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]:::current
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Tests
+
+## [Apple goto fail](https://dwheeler.com/essays/apple-goto-fail.html) (2014) <span class="citation"><a href="/sources">[4]</a></span>
+
+Duplicate line broke SSL verification for 18 months. A single unit test would have caught it.
+
+<!-- Image placeholder -->
+
+## [Knight Capital](https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html) (2012) <span class="citation"><a href="/sources">[5]</a></span>
+
+Lost **$440 million in 45 minutes**. Old test code accidentally deployed to production.
+
+<!-- Image placeholder -->
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]:::current
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bol
+```
+
+# Tests
+
+Testing is non trivial.
 
 ```rust
-fn is_even(number: u32) -> bool {
-    // ...
-}
-
 #[test]
 fn test_is_even() {
     assert!(is_even(2))
 }
 ```
 
-We never checked an odd number! For all we know:
+<br>
+<br>
+<v-click>
+
+It appears correct, although it could just be:
 
 ```rust
 fn is_even(number: u32) -> bool {
@@ -297,31 +392,7 @@ fn is_even(number: u32) -> bool {
 }
 ```
 
----
-
-```mermaid
-flowchart LR
-    A[Initiate] --> B[Tests]:::current
-    B --> C[Benchmarks]
-    C --> D[Code Quality]
-    D --> E[Correctness]
-    E --> F[Audits]
-    F --> G[Build]
-    G --> H[Push]
-    H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
-```
-
-# Tests - Why It Matters
-
-**NIST Study (2002):**
-
-- Software bugs cost the U.S. economy **$59.5 billion/year**
-- Over 1/3 of this cost (~$22B) could be avoided with better testing
-- ~80% of development costs go to identifying and correcting defects
-- Updated 2020 estimate: **$2.08 trillion** in costs from poor software quality
-
-**Famous Examples:** Apple goto fail (2014), Knight Capital (2012)
+</v-click>
 
 ---
 
@@ -335,17 +406,51 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bol
 ```
 
-# Tests - Tools of Interest
+# Tests
 
-- **cargo-mutants** - Mutation testing
-- **quickcheck** / **proptest** - Property testing
-- **kani** - Exhaustive verification
-- **insta** - Snapshot testing
-- **wiremock** - HTTP mocking
-- **nextest** - Fast test runner
+Some lessons:
+
+<v-click>
+
+- Ensure you have atleast 1 test per group in your input (even/odd in our case)
+- Always check error conditions
+- Use code coverage tools
+
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]:::current
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Tests
+
+Tools of Interest:
+
+<v-click>
+
+- [cargo-mutants](https://github.com/sourcefrog/cargo-mutants) - Mutation testing
+- [quickcheck](https://github.com/BurntSushi/quickcheck) / [proptest](https://github.com/proptest-rs/proptest) - Property testing
+- [kani](https://github.com/model-checking/kani) - Exhaustive verification
+- [insta](https://github.com/mitsuhiko/insta) - Snapshot testing
+- [wiremock](https://github.com/LukeMathWalker/wiremock-rs) - HTTP mocking
+- [nextest](https://github.com/nextest-rs/nextest) - Fast test runner
+- [codecov](https://github.com/codecov/codecov-action) - Code coverage
+
+</v-click>
 
 ---
 
@@ -359,14 +464,18 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Benchmarks
 
-If you thought testing was hard, a new challenger approaches.
+If you thought testing was hard, I have some bad news for you.
 
-Benchmarking is challenging because measuring is itself extremely difficult.
+<v-click>
+
+<img src="/bench.jpeg" class="h-80 mx-auto" />
+
+</v-click>
 
 ---
 
@@ -380,18 +489,24 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Benchmarks - The Problems
+# Benchmarks
 
-- How do we know our program got the same CPU time each time?
-- What if the CPU is busy from another process?
-- What if the kernel stops everything to reclaim memory?
+```rust
+use std::time::SystemTime;
 
-<br>
+let start = SystemTime::now();
 
-See: _"Producing Wrong Data Without Doing Anything Obviously Wrong!"_
+isEven(2);
+
+let time_in_seconds = start.elapsed();
+
+println!("isEven took {} seconds", elapsed.as_secs());
+```
+
+Seems pretty reasonable...
 
 ---
 
@@ -405,7 +520,44 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Benchmarks
+
+```rust
+use std::time::SystemTime;
+
+let start = SystemTime::now();
+
+FunctionThatNormallyTakes100SecondsToRun();
+
+let time_in_seconds = start.elapsed();
+
+println!("Function took {} seconds", elapsed.as_secs());
+```
+
+Seems pretty reasonable...
+
+---
+
+# Benchmarks
+
+OUTPUT PICTURE HERE
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]:::current
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Benchmarks - Goodput
@@ -432,7 +584,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Benchmarks - Tools of Interest
@@ -454,7 +606,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Code Quality Checks
@@ -479,7 +631,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Correctness Checks
@@ -504,7 +656,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Audits
@@ -531,7 +683,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Audits - Tools of Interest
@@ -552,7 +704,7 @@ flowchart LR
     F --> G[Build]:::current
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Building
@@ -577,7 +729,7 @@ flowchart LR
     F --> G[Build]:::current
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Building - Tools of Interest
@@ -600,7 +752,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]:::current
     H --> I[Deploy]
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Pushing
@@ -630,7 +782,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]:::current
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Deploying - Noticing New Versions
@@ -654,7 +806,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]:::current
-    classDef current fill:#f96,stroke:#333,stroke-width:4px
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Deploying - Applying Changes
@@ -684,3 +836,19 @@ With k3d and ArgoCD, we update the `Application` manifests.
 ## layout: center
 
 # Questions?
+
+---
+
+## routeAlias: sources
+
+# Sources
+
+[1] [SemVer in Rust: Breakage, Tooling, and Edge Cases](https://predr.ag/blog/semver-in-rust-tooling-breakage-and-edge-cases/) - FOSDEM 2024
+
+[2] [The Economic Impacts of Inadequate Infrastructure for Software Testing](https://www.nist.gov/document/report02-3pdf) - NIST 2002
+
+[3] [The Cost of Poor Software Quality in the US: A 2020 Report](https://www.it-cisq.org/the-cost-of-poor-software-quality-in-the-us-a-2020-report/) - CISQ 2020
+
+[4] [The Apple goto fail vulnerability: lessons learned](https://dwheeler.com/essays/apple-goto-fail.html) - David Wheeler
+
+[5] [Project Failure Case Study: Knight Capital](https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html) - Henrico Dolfing

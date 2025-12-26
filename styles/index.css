@@ -5,6 +5,9 @@
   --slidev-theme-background: #0f172a;
 }
 
+html.dark {
+}
+
 /* Main background */
 .slidev-layout {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -73,6 +76,7 @@ pre code {
   padding: 0.2rem 0.4rem !important;
   color: #f472b6 !important;
 }
+
 
 /* Lists */
 ul, ol {

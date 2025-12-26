@@ -11,18 +11,13 @@ mdc: true
 ---
 
 <style>
-.slidev-layout pre code,
-.slidev-layout .shiki,
-.shiki code,
-pre.shiki-magic-move,
-div[class*="language-"] pre,
-div[class*="language-"] code {
-  line-height: 1.1 !important;
-  padding: 0.5rem !important;
+/* Make scrollable code blocks start at the top */
+.slidev-code-wrapper {
+  align-items: flex-start !important;
 }
 
-.shiki .line {
-  line-height: 1.1 !important;
+.slidev-code-wrapper pre {
+  scroll-behavior: auto !important;
 }
 </style>
 
@@ -105,6 +100,8 @@ Deploying code that **changes** is hard:
 - Maintaining code quality
 - Meeting SLAs / SLOs
 - Ensuring deployability
+
+<img src="/yeet.gif" class="absolute bottom-10 right-10 w-96" />
 
 </v-click>
 
@@ -362,13 +359,9 @@ flowchart LR
 
 Duplicate line broke SSL verification for 18 months. A single unit test would have caught it.
 
-<!-- Image placeholder -->
-
 ## [Knight Capital](https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html) (2012) <span class="citation"><a href="/sources">[5]</a></span>
 
 Lost **$440 million in 45 minutes**. Old test code accidentally deployed to production.
-
-<!-- Image placeholder -->
 
 ---
 
@@ -382,7 +375,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bol
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Tests
@@ -422,7 +415,7 @@ flowchart LR
     F --> G[Build]
     G --> H[Push]
     H --> I[Deploy]
-    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bol
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
 # Tests
@@ -572,7 +565,7 @@ flowchart LR
 
 # Benchmarks
 
-```rust {all|1}
+```rust{all|1}
 use std::time::SystemTime;
 
 let start = SystemTime::now();
@@ -606,6 +599,11 @@ flowchart LR
 ```
 
 # Benchmarks
+
+<br>
+<br>
+
+Let's fix that
 
 ````md magic-move
 ```rust
@@ -679,13 +677,17 @@ flowchart LR
     classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# How do we know:
+# Challenges in benchmarking
+
+How do we know:
 
 <v-click>
 
 - We get the same CPU share time
 - The system didn't pause to reap memory
-- Other programs flood the TLB ?
+- There are no cache coherence problems
+- Other programs aren't flooding the TLB
+- We're measuring goodput accurately
 
 </v-click>
 
@@ -704,17 +706,34 @@ flowchart LR
     classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Benchmarks - Goodput
+# Benchmarks
 
-When measuring throughput under load, if we run out of resources the system returns 500s **really quickly**.
+Example GitHub Actions job
 
-Observed throughput ≠ Valuable throughput
-
-This is called **Goodput** - valuable throughput only.
+```yaml {*}{maxHeight:'350px'}
+- name: Benchmark HTTP endpoints
+  run: |
+    # Start server in background
+    cargo run --release &
+    SERVER_PID=$!
+    # Wait for server to be ready
+    sleep 2
+    # Run oha and extract p99.9 latency
+    LATENCY=$(oha -m POST -q 10000 -c 1000 \
+      -A 'application/json' -d '{"number": 42}' \
+      'http://localhost:8000/even_checker' \
+      -H 'Content-Type: application/json' \
+      --no-tui --output-format json | jq '.latencyPercentiles["p99.9"]')
+    # Stop server
+    kill $SERVER_PID
+    # Check latency threshold (e.g., < 50ms)
+    if (( $(echo "$LATENCY > 0.05" | bc -l) )); then
+      echo "Latency too high: ${LATENCY}s (threshold: 50ms)"
+      exit 1
+    fi
+```
 
 <br>
-
-**Example:** Cloudflare regex outage (2019)
 
 ---
 
@@ -731,12 +750,20 @@ flowchart LR
     classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Benchmarks - Tools of Interest
+# Benchmarks
 
-- **criterion** - Statistical benchmarking
-- **hyperfine** - CLI benchmarking
-- **divan** - Fast benchmarking
-- **iai-callgrind** - Instruction-level benchmarks
+Tools of Interest:
+
+<v-click>
+
+- [criterion](https://github.com/bheisler/criterion.rs) - Statistical benchmarking
+- [hyperfine](https://github.com/sharkdp/hyperfine) - CLI benchmarking
+- [divan](https://github.com/nvzqz/divan) - Fast benchmarking
+- [iai-callgrind](https://github.com/iai-callgrind/iai-callgrind) - Instruction-level benchmarks
+- [oha](https://github.com/hatoo/oha) - HTTP load testing
+- [tango](https://github.com/bazhenov/tango) - Paired benchmarking framework
+
+</v-click>
 
 ---
 
@@ -755,13 +782,40 @@ flowchart LR
 
 # Code Quality Checks
 
-CI/CD as anti-entropy is most evident here.
+The anti-entropy systems
+
+<v-click>
 
 Everyone has different coding styles. On bigger projects, we use tools to ensure a standard everyone abides by.
 
-- **rustfmt** - Consistent formatting
-- **clippy** - Best practices and common pitfalls
-- **cargo-machete** - Find unused dependencies
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]:::current
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Code Quality Checks
+
+Tools of Interest:
+
+<v-click>
+
+- [rustfmt](https://rust-lang.github.io/rustfmt/) - Consistent formatting
+- [clippy](https://doc.rust-lang.org/clippy/) - Best practices and common pitfalls
+- [cargo-machete](https://github.com/bnjbvr/cargo-machete) - Find unused dependencies
+
+</v-click>
 
 ---
 
@@ -782,11 +836,46 @@ flowchart LR
 
 Concurrent systems are hard.
 
+<v-click>
+
+<img src="/goofy.jpg" class="mx-auto h-60" />
+
+</v-click>
+
+<br>
+
+<v-click>
+
 Adding checks in your CI/CD pipeline helps catch undefined behavior before it lands in deployment.
 
-- **Miri** - Detect undefined behavior
-- **Shuttle** / **Loom** - Concurrency testing
-- **Turmoil** - Network simulation
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]:::current
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Correctness Checks
+
+Tools of Interest:
+
+<v-click>
+
+- [Miri](https://github.com/rust-lang/miri) - Detect undefined behavior
+- [Shuttle](https://github.com/awslabs/shuttle) / [Loom](https://github.com/tokio-rs/loom) - Concurrency testing
+- [Turmoil](https://github.com/tokio-rs/turmoil) - Network simulation
+
+</v-click>
 
 ---
 
@@ -807,13 +896,24 @@ flowchart LR
 
 Who wants to deploy unsafe code?
 
+<v-click>
+
 Audit tools help capture:
 
-- CVEs
-- Unmaintained repos
-- License issues
+- **CVEs** - XZ Utils backdoor (2024) nearly compromised millions of Linux systems <span class="citation"><a href="/sources">[6]</a></span>
+- **Unmaintained repos** - Log4j remains 13% vulnerable 3 years after Log4Shell <span class="citation"><a href="/sources">[7]</a></span>
+- **License issues** - Redis license change (2024) sparked community fork and trust erosion <span class="citation"><a href="/sources">[8]</a></span>
+
+</v-click>
+
+<br>
+<br>
+
+<v-click>
 
 We don't need to run this on every push - only when dependencies change or weekly.
+
+</v-click>
 
 ---
 
@@ -830,11 +930,17 @@ flowchart LR
     classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Audits - Tools of Interest
+# Audits
 
-- **cargo-deny** - Lint dependencies for security, licenses, sources
-- **cargo-vet** - Supply chain security
-- **cargo-audit** - Known vulnerability detection
+Tools of Interest:
+
+<v-click>
+
+- [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) - Lint dependencies for security, licenses, sources
+- [cargo-vet](https://github.com/mozilla/cargo-vet) - Supply chain security
+- [cargo-audit](https://github.com/rustsec/rustsec/tree/main/cargo-audit) - Known vulnerability detection
+
+</v-click>
 
 ---
 
@@ -855,11 +961,15 @@ flowchart LR
 
 Now that we have validated source code, we can build.
 
+<v-click>
+
 **Key questions:**
 
-- Where will the code run? (Container, binary, WASM?)
+- Where will the code run? (Container runtime, WASM runtime, target platform)
+- What resources will it have access to? (Embedded devices need special care)
 - How do we attach context? (SBOMs, provenance data)
-- What about image scanning?
+
+</v-click>
 
 ---
 
@@ -876,13 +986,17 @@ flowchart LR
     classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Building - Tools of Interest
+# Building
 
-- **docker buildx** - Multi-platform builds
-- **nix** - Reproducible builds
-- **cargo-auditable** - Embed dependency info in binary
+Tools of Interest:
 
-We can embed dependencies and source code info into the binary itself for future inspection.
+<v-click>
+
+- [docker buildx](https://docs.docker.com/build/buildx/) - Multi-platform builds
+- [nix](https://nixos.org/) - Reproducible builds
+- [cargo-auditable](https://github.com/rust-secure-code/cargo-auditable) - Embed dependency info in binary
+
+</v-click>
 
 ---
 
@@ -903,6 +1017,8 @@ flowchart LR
 
 Now we need to store our built artifacts somewhere.
 
+<v-click>
+
 <br>
 
 **Recommendations:**
@@ -910,33 +1026,17 @@ Now we need to store our built artifacts somewhere.
 - Upload to both cloud registry and local registry
 - Local images let you run scanning tools without cost concerns
 
+</v-click>
+
 <br>
+<br>
+<br>
+
+<v-click>
 
 **Make sure your registry entries are immutable!**
 
----
-
-```mermaid
-flowchart LR
-    A[Initiate] --> B[Tests]
-    B --> C[Benchmarks]
-    C --> D[Code Quality]
-    D --> E[Correctness]
-    E --> F[Audits]
-    F --> G[Build]
-    G --> H[Push]
-    H --> I[Deploy]:::current
-    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
-```
-
-# Deploying - Noticing New Versions
-
-Tools like **ArgoCD Image Updater** and **Flux** monitor your container registries.
-
-They either:
-
-- Directly update your runtime (continuous deployment)
-- Notify you that a new version is available
+</v-click>
 
 ---
 
@@ -953,37 +1053,176 @@ flowchart LR
     classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
 ```
 
-# Deploying - Applying Changes
+# Deploying
 
-With k3d and ArgoCD, we update the `Application` manifests.
+How do we know something new is available?
 
-<br>
+<v-click>
+
+Pull-based tooling monitors container registries and automatically detects new versions.
+
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]:::current
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Deploying
+
+Tools of Interest:
+
+<v-click>
+
+- [ArgoCD Image Updater](https://argocd-image-updater.readthedocs.io/) - Automatically update container images in ArgoCD applications
+- [Flux Image Automation](https://fluxcd.io/flux/guides/image-update/) - GitOps-native image updates
+- [Renovate](https://docs.renovatebot.com/) - Automated dependency updates including container images
+- [Dependabot](https://docs.github.com/en/code-security/dependabot) - GitHub-native updates for images in workflows and manifests
+- [Keel](https://keel.sh/) - Kubernetes deployment automation
+
+</v-click>
+
+---
+
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]:::current
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Deploying
+
+Updating manifests: GitOps vs full sending
+
+<v-click>
 
 **GitOps method:**
 
 - Built-in audit log of deployment upgrades
 - Git is the source of truth
+- Changes reviewed via PR
+
+</v-click>
+
+<v-click>
 
 **Direct modification:**
 
 - Maximum agility
 - Can get audit info earlier in pipeline
+- Updates applied immediately to main
+
+</v-click>
 
 ---
 
-## layout: center
+```mermaid
+flowchart LR
+    A[Initiate] --> B[Tests]
+    B --> C[Benchmarks]
+    C --> D[Code Quality]
+    D --> E[Correctness]
+    E --> F[Audits]
+    F --> G[Build]
+    G --> H[Push]
+    H --> I[Deploy]:::current
+    classDef current fill:#3b82f6,stroke:#333,stroke-width:2px,font-weight:bold
+```
+
+# Deploying
+
+ArgoCD Application manifests comparison:
+
+<v-click>
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+**GitOps (image-updates branch + PR)**
+
+```yaml {*}{maxHeight:'300px'}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app
+spec:
+  source:
+    repoURL: https://github.com/org/repo
+    targetRevision: image-updates
+    path: manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+```
+
+</div>
+
+<div>
+
+**Direct apply to master**
+
+```yaml {*}{maxHeight:'300px'}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app
+spec:
+  source:
+    repoURL: https://github.com/org/repo
+    targetRevision: master
+    path: manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+```
+
+</div>
+
+</div>
+
+</v-click>
+
+---
+
+# We've done it!
+
+<v-click>
+
+<div class="flex items-center justify-center h-full">
+
+We took most of the uncertainty out of our new code, without needing to enter a single command (other than initiating the pipeline)
+
+</div>
+
+</v-click>
+
+---
 
 # Thanks!
 
 ---
 
-## layout: center
-
 # Questions?
 
 ---
-
-## routeAlias: sources
 
 # Sources
 
@@ -996,3 +1235,9 @@ With k3d and ArgoCD, we update the `Application` manifests.
 [4] [The Apple goto fail vulnerability: lessons learned](https://dwheeler.com/essays/apple-goto-fail.html) - David Wheeler
 
 [5] [Project Failure Case Study: Knight Capital](https://www.henricodolfing.com/2019/06/project-failure-case-study-knight-capital.html) - Henrico Dolfing
+
+[6] [From Log4j to XZ Utils: The Escalating Crisis of Open-Source Vulnerabilities](https://checkmarx.com/learn/sca/from-log4j-to-xz-utils-the-escalating-crisis-of-open-source-vulnerabilities/) - Checkmarx 2024
+
+[7] [2024 State of the Software Supply Chain](https://www.sonatype.com/state-of-the-software-supply-chain/introduction) - Sonatype 2024
+
+[8] [Redis tightens its license terms, pleasing no one](https://www.theregister.com/2024/03/22/redis_changes_license/) - The Register 2024

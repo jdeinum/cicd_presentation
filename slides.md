@@ -540,7 +540,7 @@ flowchart LR
   </v-click>
   <v-click>
     <div>
-      <img src="/pre_instant.jpg" class="w-3/4 mt-8 ml-20" />
+      <img src="/brain.gif" class="w-4/5 mt-32 ml-20" />
       <div class="absolute bottom-10 left-10 text-2xl font-bold">
         You've done it!
       </div>

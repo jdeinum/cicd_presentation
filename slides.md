@@ -50,6 +50,7 @@ I'm Jacob! Some people call me dino.
 - On github as [jdeinum](https://github.com/jdeinum)
 - On discord as deinum#4841
 - On [nullspaces.io](https://nullspaces.io/blog)
+- On linkedin as [Jacob Deinum](https://www.linkedin.com/in/jacob-deinum-41a1a0203/)
 
 </v-click>
 
@@ -83,6 +84,12 @@ CI/CD are a set of practices that help streamline application deployment
 
 </v-click>
 
+<!--
+As developers, we should strive to understand why we do things.
+
+Uncessessary complexity slows productivity, and from experience, also inflicts emotional damage.
+-->
+
 ---
 
 # Why Do We Need It?
@@ -105,50 +112,15 @@ Deploying code that **changes** is hard:
 
 </v-click>
 
----
-
-# Taking a Simple App to Production
-
-## Goals
-
-<v-click>
-
-- Ensure correctness
-- Ensure non-functional requirements
-- Ensure proper code quality
-
-</v-click>
-
-## Non-Goals
-
-<v-click>
-
-- Setting up all of the infrastructure
-
-</v-click>
-
-<br>
-
-<v-click>
-
-We'll focus on the **pipeline**, not the platform.
-
-</v-click>
-
----
-
-# Environment Setup
-
-## We will be using:
-
-<v-click>
-
-- Axum for our http application
-- Git repository for code
-- k3d for local Kubernetes
-- ArgoCD for GitOps deployments
-
-</v-click>
+<!--
+So clearly in some cases, this is pretty important. But something I noticed was
+that a lot of source and people like to talk about CI/CD as a one size fits all
+solution that you just add to your project. Something I find a little
+misleading, because I believe that your CI/CD pipeline should be a reflection of
+your application. So rather than give a simple example, I want to talk about
+the kind of things you might want to do in a CI/CD pipeline. But before we even
+get to the pipeline itself, let's talk about the changes themselves, commits.
+-->
 
 ---
 
@@ -178,6 +150,18 @@ We gotta have something to deploy ¯\\_(ツ)_/¯
 
 This lets us fork from main without fear!
 
+<!--
+I saw a cool snippet in matklads blog about this, but unfortunatly could not
+find it again.
+
+Keeping your main branch "working" means more than just "doesn't crash",
+consider a common use case where you release a new feature for your application,
+it passes all of the tests and other correctness measures. But something changed
+in your public API, a breaking change! Now when downstream consumers upgrade to
+to the new version, it might break their software, and it's our fault. And
+you'd be surprised at how common this is.
+-->
+
 </v-click>
 
 ---
@@ -205,6 +189,13 @@ This lets us fork from main without fear!
 - Prevent accidental breaking changes
 
 </v-click>
+
+<!--
+Conventional commits are a way to add structure to things we were already doing.
+It's not perfect, because we can still misclassify a commit, but atleast we
+don't have to remember what we did in all of our commits. Even better, there are
+tools that exist or coming out that help find breaking changes!
+-->
 
 ---
 
@@ -244,6 +235,16 @@ How do we trigger a release?
 - Push to master
 
 </v-click>
+
+<!--
+So now we have our appropriately tagged versions, how we do we them into our
+main branch? A lot of companies prefer to just do them manually with git tags,
+because they are simple and effective. Other companies have release tools
+generate release PRs.
+
+Sometimes you run the pipeline on every push to main (i.e for a staging env).
+Although from chatting with friends that seems to be less common these days.
+-->
 
 ---
 
@@ -300,6 +301,15 @@ Each testing strategy lies somewhere on a **scope** and **purity** grid.
 - Integration tests
 
 </v-click>
+
+<!--
+I don't think this surprised anyone. Testing is necessary to prove particular
+classes of bugs don't exist, but it is not sufficient in proving your
+application works as expected.
+
+There's a bunch of different kinds of testing, and the type you choose will
+probably be a reflection of the kind of application you are building.
+-->
 
 ---
 
@@ -402,6 +412,14 @@ fn is_even(number: u32) -> bool {
 ```
 
 </v-click>
+
+<!--
+Writing good tests goes beyond a single test coverage score. Consider this
+rather simple test. Should this test increase our perception that the code works
+as expected? Any takers?
+
+Well what if it's just this.
+-->
 
 ---
 
@@ -517,6 +535,13 @@ println!("Function took {} seconds", elapsed.as_secs());
 
 Seems pretty reasonable...
 
+<!--
+Take this simple snippet, where we want to benchmark this function that normally
+takes 100 seconds to run. Can anyone see the problem? This problem exists in
+most programming languages. It's not a syntax or logic problem either. Any
+guesses?
+-->
+
 ---
 
 ```mermaid
@@ -582,6 +607,12 @@ println!("Function took {} seconds", elapsed.as_secs());
 Not **monotonic**, NTP can step your clock back!
 
 </v-click>
+
+<!--
+The problem is the type of clock we're using. System clocks are allowed to be
+stepped backwards by your NTP or PTP daemon. Like, who thinks of this when they
+are just writing a simple benchmark?
+-->
 
 ---
 
@@ -691,6 +722,22 @@ How do we know:
 
 </v-click>
 
+<!--
+Controlling these things is really really hard, and knowing that they are
+happening may be just as challenging. There's a good paper called "Producing
+Wrong Data Without Doing Anything Obviously Wrong!" where changing small
+seamingly irrelevant things about the program leads to drastically different
+benchmarking results.
+
+Even assuming you can perfectly capture what you intend to, how do you know
+that's the thing you're actually wanting to caputre. Another good paper here is
+called Open Versus Closed, a cautionary tale, that talks about modelling
+incoming requests, and the common pitfalls associated with it.
+
+This isn't meant to be discouraging, but rather to tell you that benchmarking is
+not trival, in a way it is just statistics, with a bunch of forms of bias.
+-->
+
 ---
 
 ```mermaid
@@ -734,6 +781,10 @@ Example GitHub Actions job
 ```
 
 <br>
+
+<!--
+Here is just a simple github action for testing latency.
+-->
 
 ---
 
@@ -970,6 +1021,11 @@ Now that we have validated source code, we can build.
 - How do we attach context? (SBOMs, provenance data)
 
 </v-click>
+
+<!--
+These sorts of questions are very much what guide us to choosing our deployment
+approach.
+-->
 
 ---
 

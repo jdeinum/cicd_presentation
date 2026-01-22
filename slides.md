@@ -537,9 +537,7 @@ Seems pretty reasonable...
 
 <!--
 Take this simple snippet, where we want to benchmark this function that normally
-takes 100 seconds to run. Can anyone see the problem? This problem exists in
-most programming languages. It's not a syntax or logic problem either. Any
-guesses?
+takes 100 seconds to run.
 -->
 
 ---
@@ -609,6 +607,9 @@ Not **monotonic**, NTP can step your clock back!
 </v-click>
 
 <!--
+Can anyone see the problem? This problem exists in most programming languages.
+It's not a syntax or logic problem either. Any guesses?
+
 The problem is the type of clock we're using. System clocks are allowed to be
 stepped backwards by your NTP or PTP daemon. Like, who thinks of this when they
 are just writing a simple benchmark?

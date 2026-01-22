@@ -1000,7 +1000,7 @@ Tools of Interest:
 
 <v-click>
 
-- [docker buildx](https://docs.docker.com/build/buildx/) - Multi-platform builds
+- [docker buildx](https://docs.docker.com/reference/cli/docker/buildx/) - Multi-platform builds
 - [nix](https://nixos.org/) - Reproducible builds
 - [cargo-auditable](https://github.com/rust-secure-code/cargo-auditable) - Embed dependency info in binary
 
